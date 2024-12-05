@@ -16,14 +16,14 @@ const startApolloServer = async () => {
     resolvers
   });
 
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = dirname(__filename);
-
   await server.start();
   await db();
 
   const PORT = process.env.PORT || 3001;
   const app = express();
+
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
 
   app.use(cors());
   app.use(express.urlencoded({ extended: false }));
