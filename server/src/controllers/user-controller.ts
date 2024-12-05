@@ -19,6 +19,7 @@ export const getSingleUser = async (req: Request, res: Response) => {
 
 // create a user, sign a token, and send it back (to client/src/components/SignUpForm.js)
 export const createUser = async (req: Request, res: Response) => {
+  console.log(`create user function from user controllers`);
   const user = await User.create(req.body);
 
   if (!user) {

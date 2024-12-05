@@ -1,6 +1,5 @@
 import { gql } from "graphql-tag";
 
-
 const typeDefs = gql`
     type Auth {
         token: String!
@@ -9,16 +8,16 @@ const typeDefs = gql`
 
     type User {
         _id: ID!
-        username: String
-        email: String
-        password: String
+        username: String!
+        email: String!
+        password: String!
         savedBooks: [Book]
         bookCount: Int
     }
 
     type Book {
-        bookId: ID!
-        title: String
+        bookId: String!
+        title: String!
         authors: [String]
         description: String
         image: String
@@ -26,7 +25,7 @@ const typeDefs = gql`
     }
 
     input BookInput {
-        bookId: ID!
+        bookId: String
         title: String
         authors: [String]
         description: String
@@ -39,11 +38,17 @@ const typeDefs = gql`
         user(userId: ID!): User
     }
 
+    input userInput {
+        username: String!
+        email: String!
+        password: String!
+    }
+
     type Mutation {
-        addUser(username: String!, email: String!, password: String!): Auth
+        addUser(userInfo: userInput): Auth
         login(email: String!, password: String!): Auth
         saveBook(book: BookInput!): User
-        deleteBook(bookId: ID!): User        
+        deleteBook(bookId: String!): User        
     }
 `;
 
