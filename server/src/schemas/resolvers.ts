@@ -7,8 +7,8 @@ interface UserData {
     username: string;
     email: string;
     password: string;
-    savedBooks: BookDocument[];
-    bookCount: number;
+    savedBooks?: BookDocument[];
+    bookCount?: number;
 }
 
 interface UserArgs {
@@ -20,16 +20,24 @@ interface Context {
 }
 
 interface AddUserArgs {
-    input: {
+    userInfo: {
         username: string;
         email: string;
         password: string;
     }
 }
 
-interface BookArgs {
-    userId: string;
+interface SaveBookArgs {
+    book: BookDocument;
+}
+
+interface DeleteBookArgs {
     bookId: string;
+}
+
+interface Auth {
+    token: string;
+    user: UserData;
 }
 
 const resolvers = {
@@ -45,8 +53,9 @@ const resolvers = {
         },
     },
     Mutation: {
-        addUser: async (_parent: any, { input }: AddUserArgs): Promise< { token: string; user: UserData }> => {
-            const user = await User.create({ ...input });
+        addUser: async (_parent: any, { userInfo }: AddUserArgs): Promise<Auth> => {
+            console.log('from resolvers addUser');
+            const user = await User.create({ ...userInfo });
             const token = signToken(user.username, user.email, user._id);
             return { user, token };
         },
@@ -62,11 +71,22 @@ const resolvers = {
             const token = signToken( user.username, user.email, user._id);
             return { user, token };
         },
-        saveBook: async (_parent: any, { userId, bookId }: BookArgs, context: Context): Promise<UserData | null> => {
+        saveBook: async (_parent: any, { book }: SaveBookArgs, context: Context): Promise<UserData | null> => {
             if (context.user) {
-                return await User.findOneAndUpdate(
+                    const userId = context.user._id;
+                    return await User.findOneAndUpdate(
                     { _id: userId },
-                    { $addToSet: { savedBooks: bookId }},
+                    { $addToSet: { 
+                        savedBooks: {
+                            authors: book.authors,
+                            bookId: book.bookId,
+                            description: book.description,
+                            image: book.image,
+                            link: book.link,
+                            title: book.title
+                            } 
+                        }
+                    },
                     {
                         new: true,
                         runValidators: true,
@@ -75,11 +95,17 @@ const resolvers = {
             }
             throw AuthenticationError;
         },
-        deleteBook: async (_parent: any, { userId, bookId }: BookArgs, context: Context): Promise<UserData | null> => {
+        deleteBook: async (_parent: any, { bookId }: DeleteBookArgs, context: Context): Promise<UserData | null> => {
             if (context.user) {
+                const userId = context.user._id;
                 return await User.findOneAndUpdate(
                     { _id: userId },
-                    { $pull: { savedBooks: bookId }},
+                    { $pull: { 
+                        savedBooks: {
+                            bookId: bookId 
+                            }
+                        }
+                    },
                     { new: true }
                 );
             }

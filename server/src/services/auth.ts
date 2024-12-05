@@ -19,7 +19,7 @@ export const authenticateToken = ({ req }: any) => {
     const { data }: any = jwt.verify(token, process.env.JWT_SECRET_KEY || '', { maxAge: '1h' });
     req.user = data;
   } catch (err) {
-    console.log('Invalid Token');
+    console.log('Invalid Token auth');
   }
 
   return req;
